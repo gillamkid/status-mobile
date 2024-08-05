@@ -1174,7 +1174,10 @@
   "include": "Include",
   "incoming": "Incoming",
   "incoming-transaction": "Incoming transaction",
-  "incorrect-code": ["str", "Sorry the code was incorrect, please enter it again"],
+  "incorrect-code": [
+    "str",
+    "Sorry the code was incorrect, please enter it again"
+  ],
   "incorrect-private-key": "This is not the private key for this key pair",
   "increase-gas": "Increase Gas",
   "information-you-input-and-send": "Information you input and send",
@@ -2839,5 +2842,7 @@
   "your-recovery-phrase": "Your seed phrase",
   "your-recovery-phrase-description": "This is your seed phrase. You use it to prove that this is your wallet. You only get to see it once! Write it on paper and keep it in a secure place. You will need it if you lose or reinstall your wallet.",
   "your-tip-limit": "Your tip limit",
-  "youre-on-mobile-network": "You’re on mobile network"
+  "youre-on-mobile-network": "You’re on mobile network",
+  "select-network-for-buying": "Select network for buying",
+  "select-asset-to-buy": "Select asset to buy"
 }

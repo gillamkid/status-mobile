@@ -2,15 +2,28 @@
   (:require [oops.core :as oops]
             [quo.core :as quo]
             [react-native.core :as rn]
+            [status-im.contexts.wallet.sheets.buy-network-selection.view :as buy-network-selection]
             [status-im.contexts.wallet.sheets.buy-token.style :as style]
             [utils.i18n :as i18n]
-            [utils.re-frame :as rf]))
+            [utils.re-frame :as rf]
+            [clojure.string :as string]))
 
 (defn- crypto-on-ramp-item
-  [{:keys [name description fees logo-url site-url recurrent-site-url]} _ _ {:keys [tab]}]
-  (let [open-url (rn/use-callback (fn []
-                                    (rn/open-url (if (= tab :recurrent) recurrent-site-url site-url)))
-                                  [site-url recurrent-site-url tab])]
+  [{:keys [name description fees logo-url site-url recurrent-site-url] :as provider} _ _ {:keys [tab]}]
+  (let [open-url (rn/use-callback
+                  (fn []
+                    (if (= (string/lower-case name) "mercuryo")
+                      (rf/dispatch
+                       [:show-bottom-sheet
+                        {:content
+                         (fn []
+                           [buy-network-selection/view
+                            {:on-select-network
+                             (fn [network]
+                               (rf/dispatch [:hide-bottom-sheet])
+                               (rn/open-url (if (= tab :recurrent) recurrent-site-url site-url)))}])}])
+                      (rn/open-url (if (= tab :recurrent) recurrent-site-url site-url))))
+                  [site-url recurrent-site-url tab])]
     [quo/settings-item
      {:title             name
       :description       :text
