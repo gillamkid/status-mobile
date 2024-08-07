@@ -1,4 +1,4 @@
-(ns status-im.contexts.wallet.sheets.network-selection.style)
+(ns status-im.contexts.wallet.sheets.buy-network-selection.style)
 
 (defn network-list-container
   [mainnet?]
@@ -10,8 +10,19 @@
    :padding-horizontal 20})
 
 (def context-tag
-  {:margin-top 4})
+  {:margin-top 0})
 
 (def divider-label
   {:padding-top    0
    :padding-bottom 0})
+
+(def subheader-container
+  {:flex-direction :row
+   :align-items    :center
+   :margin-top     4})
+
+(def on
+  {:margin-right 4})
+
+(def to
+  {:margin-horizontal 4})

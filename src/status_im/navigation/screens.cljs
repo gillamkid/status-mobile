@@ -110,6 +110,8 @@
     [status-im.contexts.wallet.bridge.bridge-to.view :as wallet-bridge-to]
     [status-im.contexts.wallet.bridge.input-amount.view :as wallet-bridge-input-amount]
     [status-im.contexts.wallet.bridge.select-asset.view :as wallet-bridge-select-asset]
+    [status-im.contexts.wallet.buy-crypto.select-asset-to-buy.view :as
+     wallet-buy-crypto-select-asset-to-buy]
     [status-im.contexts.wallet.collectible.view :as wallet-collectible]
     [status-im.contexts.wallet.common.scan-account.view :as wallet-scan-address]
     [status-im.contexts.wallet.connected-dapps.scan-dapp.view :as wallet-scan-dapp]
@@ -522,6 +524,10 @@
     {:name      :screen/wallet.scan-address
      :options   options/dark-screen
      :component wallet-scan-address/view}
+
+    {:name      :screen/wallet.buy-crypto-select-asset-to-buy
+     :options   {:sheet? true}
+     :component wallet-buy-crypto-select-asset-to-buy/view}
 
     {:name      :screen/wallet.swap-select-asset-to-pay
      :options   {:modalPresentationStyle :overCurrentContext

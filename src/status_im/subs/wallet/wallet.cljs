@@ -395,6 +395,22 @@
                 :formatted-balance formatted-balance)))))
 
 (rf/reg-sub
+ :wallet/current-viewing-account-or-default
+ :<- [:wallet/accounts]
+ :<- [:wallet/current-viewing-account-address]
+ :<- [:wallet/balances-in-selected-networks]
+ :<- [:profile/currency-symbol]
+ (fn [[accounts current-viewing-account-address balances currency-symbol]]
+   (let [account           (or (utils/get-account-by-address accounts current-viewing-account-address)
+                               (utils/get-default-account accounts))
+         address           (:address account)
+         balance           (get balances address)
+         formatted-balance (utils/prettify-balance currency-symbol balance)]
+     (assoc account
+            :balance           balance
+            :formatted-balance formatted-balance))))
+
+(rf/reg-sub
  :wallet/current-viewing-account-color
  :<- [:wallet/current-viewing-account]
  :-> :color)
@@ -415,23 +431,38 @@
 
 (rf/reg-sub
  :wallet/current-viewing-account-tokens-filtered
- :<- [:wallet/current-viewing-account]
+ :<- [:wallet/current-viewing-account-or-default]
  :<- [:wallet/network-details]
  :<- [:wallet/wallet-send]
  (fn [[account networks send-data] [_ query chain-ids]]
    (prn send-data)
-   (let [tx-type       (:tx-type send-data)
-         tokens        (map (fn [token]
-                              (assoc token
-                                     :bridge-disabled?  (and (= tx-type :tx/bridge)
-                                                             (send-utils/bridge-disabled? (:symbol
-                                                                                           token)))
-                                     :networks          (network-utils/network-list token networks)
-                                     :available-balance (utils/calculate-total-token-balance token)
-                                     :total-balance     (utils/calculate-total-token-balance token
-                                                                                             chain-ids)))
-                            (:tokens account))
-         sorted-tokens (utils/sort-tokens tokens)]
+   (let [tx-type                     (:tx-type send-data)
+         account-tokens              (:tokens account)
+         filter-tokens-in-chains     (if chain-ids
+                                       (utils/filter-tokens-in-chains account-tokens chain-ids)
+                                       account-tokens)
+         account-tokens-with-balance (map (fn [token]
+                                            (assoc token
+                                                   :bridge-disabled? (and (= tx-type :tx/bridge)
+                                                                          (send-utils/bridge-disabled?
+                                                                           (:symbol
+                                                                            token)))
+                                                   :networks (network-utils/network-list token networks)
+                                                   :available-balance
+                                                   (utils/calculate-total-token-balance token)
+                                                   :total-balance (utils/calculate-total-token-balance
+                                                                   token
+                                                                   chain-ids)))
+                                          filter-tokens-in-chains)
+         tokens                      (if chain-ids
+                                       (filter (fn [token]
+                                                 (some (set chain-ids)
+                                                       (mapv (fn [network]
+                                                               (:chain-id network))
+                                                             (:networks token))))
+                                               account-tokens-with-balance)
+                                       account-tokens-with-balance)
+         sorted-tokens               (utils/sort-tokens tokens)]
      (if query
        (let [query-string (string/lower-case query)]
          (filter #(or (string/starts-with? (string/lower-case (:name %)) query-string)
