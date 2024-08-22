@@ -52,6 +52,10 @@
                                          :receiver?      true})
          to-network-values-for-ui      (send-utils/network-values-for-ui
                                         to-network-amounts-by-chain)
+         estimated-received-values     (send-utils/estimated-received-by-chain
+                                        {:route          chosen-route
+                                         :token-decimals token-decimals
+                                         :native-token?  native-token?})
          sender-possible-chain-ids     (map :chain-id sender-network-values)
          sender-network-values         (if routes-available?
                                          (send-utils/network-amounts
@@ -89,14 +93,15 @@
      {:db (update-in db
                      [:wallet :ui :send]
                      assoc
-                     :suggested-routes          suggested-routes-data
-                     :route                     chosen-route
-                     :from-values-by-chain      from-network-values-for-ui
-                     :to-values-by-chain        to-network-values-for-ui
-                     :sender-network-values     sender-network-values
-                     :receiver-network-values   receiver-network-values
-                     :network-links             network-links
-                     :loading-suggested-routes? false)})))
+                     :suggested-routes            suggested-routes-data
+                     :route                       chosen-route
+                     :from-values-by-chain        from-network-values-for-ui
+                     :to-values-by-chain          to-network-values-for-ui
+                     :estimated-received-by-chain estimated-received-values
+                     :sender-network-values       sender-network-values
+                     :receiver-network-values     receiver-network-values
+                     :network-links               network-links
+                     :loading-suggested-routes?   false)})))
 
 (rf/reg-event-fx :wallet/suggested-routes-error
  (fn [{:keys [db]} [error-message]]
