@@ -478,3 +478,13 @@
    :toAsset     to-asset
    :fromAmount  amount-out
    :type        multi-transaction-type})
+
+(defn estimated-time-format
+  "Formats the estimated time for a transaction"
+  [estimated-time]
+  (condp = estimated-time
+    (:unknown constants/wallet-transaction-estimation)                 ""
+    (:less_than_one_minute constants/wallet-transaction-estimation)    "< 1"
+    (:less_than_three_minutes constants/wallet-transaction-estimation) "< 3"
+    (:less_than_five_minutes constants/wallet-transaction-estimation)  "< 5"
+    "> 5"))
