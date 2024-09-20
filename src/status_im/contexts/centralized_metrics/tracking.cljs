@@ -43,15 +43,31 @@
     :screen/onboarding.syncing-progress
     :screen/onboarding.syncing-progress-intro
     :screen/onboarding.syncing-results
-    :screen/onboarding.welcome})
+    :screen/onboarding.welcome
+
+    ;; Collectibles
+    :screen/wallet.collectible})
 
 (defn track-view-id-event
   [view-id]
   (when (contains? view-ids-to-track view-id)
     (navigation-event (name view-id))))
 
+(defn collectilbes-fetched-event
+  [db]
+  (let [accounts               (get-in db [:wallet :accounts])
+        amount-on-all-accounts (reduce (fn [collectibles-amount account]
+                                         (+ collectibles-amount (:current-collectible-idx account)))
+                                       0
+                                       (vals accounts))]
+    (key-value-event "collectibles-fetched" :total-amount amount-on-all-accounts)))
+
+(defn navigated-to-collectibles-tab-event
+  [location]
+  (key-value-event "navigated-to-collectibles-tab" :location location))
+
 (defn tracked-event
-  [[event-name second-parameter]]
+  [[event-name second-parameter] db]
   (case event-name
     :profile/get-profiles-overview-success
     (user-journey-event app-started-event)
@@ -61,5 +77,16 @@
 
     :set-view-id
     (track-view-id-event second-parameter)
+
+    :wallet/select-account-tab
+    (when (= second-parameter :collectibles)
+      (navigated-to-collectibles-tab-event :account))
+
+    :wallet/select-home-tab
+    (when (= second-parameter :collectibles)
+      (navigated-to-collectibles-tab-event :home))
+
+    :wallet/flush-collectibles-fetched
+    (collectilbes-fetched-event db)
 
     nil))

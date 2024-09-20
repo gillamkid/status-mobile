@@ -35,11 +35,15 @@
    :on-press            #(rf/dispatch [:show-bottom-sheet {:content new-account}])
    :type                :add-account})
 
+(def first-tab-id :assets)
+
 (def tabs-data
   [{:id :assets :label (i18n/label :t/assets) :accessibility-label :assets-tab}
    {:id :collectibles :label (i18n/label :t/collectibles) :accessibility-label :collectibles-tab}
    (when (ff/enabled? ::ff/wallet.home-activity)
      {:id :activity :label (i18n/label :t/activity) :accessibility-label :activity-tab})])
+
+(defn- change-tab [id] (rf/dispatch [:wallet/select-home-tab id]))
 
 (defn- render-cards
   [cards ref]
@@ -64,15 +68,15 @@
 
 (defn view
   []
-  (let [[selected-tab set-selected-tab] (rn/use-state (:id (first tabs-data)))
-        account-list-ref                (rn/use-ref-atom nil)
-        tokens-loading?                 (rf/sub [:wallet/home-tokens-loading?])
-        networks                        (rf/sub [:wallet/selected-network-details])
-        account-cards-data              (rf/sub [:wallet/account-cards-data])
-        cards                           (conj account-cards-data (new-account-card-data))
-        [init-loaded? set-init-loaded]  (rn/use-state false)
-        {:keys [formatted-balance]}     (rf/sub [:wallet/aggregated-token-values-and-balance])
-        theme                           (quo.theme/use-theme)]
+  (let [selected-tab                   (or (rf/sub [:wallet/home-tab]) first-tab-id)
+        account-list-ref               (rn/use-ref-atom nil)
+        tokens-loading?                (rf/sub [:wallet/home-tokens-loading?])
+        networks                       (rf/sub [:wallet/selected-network-details])
+        account-cards-data             (rf/sub [:wallet/account-cards-data])
+        cards                          (conj account-cards-data (new-account-card-data))
+        [init-loaded? set-init-loaded] (rn/use-state false)
+        {:keys [formatted-balance]}    (rf/sub [:wallet/aggregated-token-values-and-balance])
+        theme                          (quo.theme/use-theme)]
     (rn/use-effect (fn []
                      (when (and @account-list-ref (pos? (count cards)))
                        (.scrollToOffset ^js @account-list-ref
@@ -104,7 +108,7 @@
                                  (when (ff/enabled? ::ff/wallet.graph)
                                    [quo/wallet-graph {:time-frame :empty}])
                                  [render-cards cards account-list-ref]
-                                 [render-tabs tabs-data set-selected-tab selected-tab]]
+                                 [render-tabs tabs-data change-tab selected-tab]]
        :content-container-style style/list-container
        :sticky-header-indices   [0]
        :data                    []
