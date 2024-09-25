@@ -2,6 +2,7 @@
   (:require
     ["bignumber.js" :as BigNumber]
     [clojure.string :as string]
+    [goog.math.Integer :as gint]
     [schema.core :as schema]
     [utils.i18n :as i18n]))
 
@@ -150,6 +151,11 @@
 (defn to-hex
   [^js bn]
   (str "0x" (to-string bn 16)))
+
+(defn from-hex
+  [hex-str]
+  (-> (gint/fromString hex-str 16)
+      bignumber))
 
 (defn wei->str
   ([unit n display-unit]
